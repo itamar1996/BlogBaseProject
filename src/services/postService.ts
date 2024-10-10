@@ -6,6 +6,8 @@ import responseData from "../DTO/responceDataDTO";
 import updatePostDTO from "../DTO/updatePostDTO";
 import postModel from "../models/postModel";
 import userModel from "../models/userModel";
+import addCommentDTO from '../DTO/addCommentDTO';
+import postWhitCommentsDTO from '../DTO/postWhitCommentsDTO';
 export default class PostService{
     public static async createPost(newPost:newPostDTO):Promise<responseData<{ id: string }>>{
         try {                        
@@ -170,6 +172,41 @@ export default class PostService{
             };
         } catch (error) {
             console.error("Error fetching user:", error); 
+            return {
+                err: true,
+                message: "Server error",
+                status: 500,
+                data: error 
+            };
+        }
+    }
+    public static async handelAddComment(postid:string,comment:addCommentDTO) :Promise<responseData<postWhitCommentsDTO>>{
+        try {
+            const {content,author} = comment
+            const post = await postModel.findByIdAndUpdate
+            (
+                postid,
+                {$push:{comments:comment}},
+                { new: true, runValidators: true }          
+            )
+            .select('id title content comments') 
+
+            if (!post) {
+                return {
+                    err: true,
+                    message: "post not found",
+                    status: 404,
+                    data: null 
+                };
+            }
+            return {
+                err: false,
+                message: "comment aded successfully",
+                status: 200,
+                data: post
+            };
+        } catch (error) {
+            console.error("Error fetching post:", error); 
             return {
                 err: true,
                 message: "Server error",

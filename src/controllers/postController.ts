@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import newPostDTO from "../DTO/newPostDTO";
 import PostService from "../services/postService";
 import updatePostDTO from "../DTO/updatePostDTO";
+import addCommentDTO from "../DTO/addCommentDTO";
 
 // Create a new post
 export const createPost = async (
@@ -25,7 +26,7 @@ export const deletePost = async (
 ): Promise<void> => {
   try {    
     const result =  await PostService.deleteByPostId(req.params.id);
-    
+
     res.status(200).json(result)
 } catch (error) {
     console.log(error);
@@ -81,9 +82,16 @@ export const updatePost = async (
 
 // Add a comment to a post
 export const addComment = async (
-  req: Request,
+  req: Request<any,any,addCommentDTO>,
   res: Response,
   next: NextFunction
-): Promise<void> => {};
+): Promise<void> => {
+  try {
+    const result =  await PostService.handelAddComment(req.params.id,req.body);
+    res.status(200).json(result)
+} catch (error) {
+    console.log(error);
+}
+};
 
 

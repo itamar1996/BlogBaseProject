@@ -70,5 +70,13 @@ const updatePost = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.updatePost = updatePost;
 // Add a comment to a post
-const addComment = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { });
+const addComment = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield postService_1.default.handelAddComment(req.params.id, req.body);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.addComment = addComment;

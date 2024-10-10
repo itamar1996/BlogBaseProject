@@ -185,5 +185,37 @@ class PostService {
             }
         });
     }
+    static handelAddComment(postid, comment) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { content, author } = comment;
+                const post = yield postModel_1.default.findByIdAndUpdate(postid, { $push: { comments: comment } }, { new: true, runValidators: true })
+                    .select('id title content comments');
+                if (!post) {
+                    return {
+                        err: true,
+                        message: "post not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                return {
+                    err: false,
+                    message: "comment aded successfully",
+                    status: 200,
+                    data: post
+                };
+            }
+            catch (error) {
+                console.error("Error fetching post:", error);
+                return {
+                    err: true,
+                    message: "Server error",
+                    status: 500,
+                    data: error
+                };
+            }
+        });
+    }
 }
 exports.default = PostService;
