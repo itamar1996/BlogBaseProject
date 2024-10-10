@@ -8,12 +8,40 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUser = exports.getUsers = exports.createUser = void 0;
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const userService_1 = __importDefault(require("../services/userService"));
+const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield userService_1.default.signup(req.body);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.createUser = createUser;
-const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield userService_1.default.getAll();
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.getUsers = getUsers;
-const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield userService_1.default.getByUserName(req.params.username);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.getUser = getUser;
 // Optionally, add DELETE and EDIT functions

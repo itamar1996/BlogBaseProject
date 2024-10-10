@@ -48,5 +48,4 @@ const PostSchema = new mongoose.Schema<IPost>({
 });
 
 
-const Comment = mongoose.model('Comment', CommentSchema);
-const Post = mongoose.model('Post', PostSchema);
+export default mongoose.model<IPost>("Post",PostSchema);

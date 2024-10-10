@@ -36,5 +36,4 @@ const PostSchema = new mongoose_1.default.Schema({
     },
     comments: [CommentSchema], // הוספת תגובות ישירות באמצעות הסכמה של תגובות
 });
-const Comment = mongoose_1.default.model('Comment', CommentSchema);
-const Post = mongoose_1.default.model('Post', PostSchema);
+exports.default = mongoose_1.default.model("Post", PostSchema);

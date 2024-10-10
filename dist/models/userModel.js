@@ -31,13 +31,14 @@ const validator_1 = __importDefault(require("validator"));
 const UserSchema = new mongoose_1.Schema({
     username: {
         type: String,
+        unique: true,
         required: [true, 'Username is required'],
-        minlength: [10, 'Name too short. Must be at least 10 characters long']
+        minlength: [5, 'Name too short. Must be at least 10 characters long']
     },
     email: {
         type: String,
         required: true,
-        minlength: 10,
+        minlength: 5,
         unique: true,
         validate: {
             validator: function (v) {
