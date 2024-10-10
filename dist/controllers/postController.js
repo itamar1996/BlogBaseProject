@@ -8,16 +8,36 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addComment = exports.updatePost = exports.getPost = exports.getPosts = exports.deletePost = exports.createPost = void 0;
+const postService_1 = __importDefault(require("../services/postService"));
 // Create a new post
-const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { });
+const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield postService_1.default.createPost(req.body);
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.createPost = createPost;
 // Delete a post
 const deletePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { });
 exports.deletePost = deletePost;
 // Get all posts
-const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { });
+const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield postService_1.default.getAllPosts();
+        res.status(200).json(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.getPosts = getPosts;
 // Get a single post by ID
 const getPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { });
