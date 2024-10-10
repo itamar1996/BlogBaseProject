@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import newPostDTO from "../DTO/newPostDTO";
 import PostService from "../services/postService";
+import updatePostDTO from "../DTO/updatePostDTO";
 
 // Create a new post
 export const createPost = async (
@@ -21,7 +22,15 @@ export const deletePost = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {};
+): Promise<void> => {
+  try {    
+    const result =  await PostService.deleteByPostId(req.params.id);
+    
+    res.status(200).json(result)
+} catch (error) {
+    console.log(error);
+}
+};
 
 
 
@@ -45,15 +54,29 @@ export const getPost = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {};
+): Promise<void> => {
+  try {
+    const result =  await PostService.getByPostId(req.params.id);
+    res.status(200).json(result)
+} catch (error) {
+    console.log(error);
+}
+};
 
 
 // Update a post
 export const updatePost = async (
-  req: Request,
+  req: Request<any,any,updatePostDTO>,
   res: Response,
   next: NextFunction
-): Promise<void> => {};
+): Promise<void> => {
+  try {
+    const result =  await PostService.updatePost(req.params.id,req.body);
+    res.status(200).json(result)
+} catch (error) {
+    console.log(error);
+}
+};
 
 
 // Add a comment to a post

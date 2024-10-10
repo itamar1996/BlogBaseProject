@@ -25,6 +25,17 @@ class PostService {
                     author
                 });
                 yield dbPost.save();
+                const user = yield userModel_1.default.findById(author);
+                if (!user) {
+                    return {
+                        err: true,
+                        message: "User not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                user.posts.push(dbPost._id);
+                yield user.save();
                 const populatedPost = yield postModel_1.default.findById(dbPost._id).populate('author', 'id username email');
                 return {
                     err: false,
@@ -67,23 +78,100 @@ class PostService {
             }
         });
     }
-    static getByUserName(username) {
+    static getByPostId(postid) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield userModel_1.default.findOne({ username }).select('id username email');
-                if (!user) {
+                const post = yield postModel_1.default.findById(postid)
+                    .select('id title content author')
+                    .populate('author', 'id username email');
+                if (!post) {
                     return {
                         err: true,
-                        message: "User not found",
+                        message: "post not found",
                         status: 404,
                         data: null
                     };
                 }
                 return {
                     err: false,
-                    message: "Fetched user successfully",
+                    message: "Fetched post successfully",
                     status: 200,
-                    data: user
+                    data: post
+                };
+            }
+            catch (error) {
+                console.error("Error fetching user:", error);
+                return {
+                    err: true,
+                    message: "Server error",
+                    status: 500,
+                    data: error
+                };
+            }
+        });
+    }
+    static updatePost(postid, newPost) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { title, content } = newPost;
+                const post = yield postModel_1.default.findByIdAndUpdate(postid, { $set: { title: title, content: content } }, { new: true, runValidators: true })
+                    .select('id title content author')
+                    .populate('author', 'id username email');
+                if (!post) {
+                    return {
+                        err: true,
+                        message: "post not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                return {
+                    err: false,
+                    message: "post update successfully",
+                    status: 200,
+                    data: post
+                };
+            }
+            catch (error) {
+                console.error("Error fetching post:", error);
+                return {
+                    err: true,
+                    message: "Server error",
+                    status: 500,
+                    data: error
+                };
+            }
+        });
+    }
+    static deleteByPostId(postid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const post = yield postModel_1.default.findById(postid)
+                    .select('author');
+                const user = yield userModel_1.default.findById(post === null || post === void 0 ? void 0 : post.author);
+                if (!user) {
+                    return {
+                        err: true,
+                        message: "user not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                yield userModel_1.default.updateOne({ _id: post === null || post === void 0 ? void 0 : post.author }, { $pull: { posts: postid } });
+                const result = yield postModel_1.default.deleteOne({ _id: postid });
+                if (!result) {
+                    return {
+                        err: true,
+                        message: "post not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                return {
+                    err: false,
+                    message: "Fetched post successfully",
+                    status: 200,
+                    data: postid
                 };
             }
             catch (error) {

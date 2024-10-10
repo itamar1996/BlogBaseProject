@@ -1,5 +1,9 @@
+import { Types } from 'mongoose';
+
 import newPostDTO from "../DTO/newPostDTO";
+import postWhithUserDTO from "../DTO/postWhithUserDTO";
 import responseData from "../DTO/responceDataDTO";
+import updatePostDTO from "../DTO/updatePostDTO";
 import postModel from "../models/postModel";
 import userModel from "../models/userModel";
 export default class PostService{
@@ -11,7 +15,19 @@ export default class PostService{
               content,
               author
               });     
-            await dbPost.save()  
+            await dbPost.save() 
+            const user = await userModel.findById(author);
+        if (!user) {
+            return {
+                err: true,
+                message: "User not found",
+                status: 404,
+                data: null
+            };
+        }
+        
+        user.posts.push(dbPost._id as Types.ObjectId);
+            await user.save();
             const populatedPost = await postModel.findById(dbPost._id).populate('author', 'id username email');
 
             return {
@@ -29,7 +45,7 @@ export default class PostService{
             };
         }
     }
-    public static async getAllPosts(): Promise<responseData<{ id: string; title: string; content: string; author: { id: string; username: string; email: string } }>>  {
+    public static async getAllPosts(): Promise<responseData<postWhithUserDTO>>  {
         try {
             const posts = await postModel.find({})
             .select('id title content author')
@@ -50,24 +66,25 @@ export default class PostService{
             };
         }
     }
-    public static async getByUserName(username: string): Promise<responseData<{ id: string; title: string; content: string; author: { id: string; username: string; email: string } }>> {
+    public static async getByPostId(postid: string) :Promise<responseData<postWhithUserDTO>>{
         try {
-            const user = await userModel.findOne({ username }).select('id username email'); 
-    
-            if (!user) {
+            const post = await postModel.findById(postid) 
+            .select('id title content author') 
+            .populate('author', 'id username email');
+
+            if (!post) {
                 return {
                     err: true,
-                    message: "User not found",
+                    message: "post not found",
                     status: 404,
                     data: null 
                 };
             }
-    
             return {
                 err: false,
-                message: "Fetched user successfully",
+                message: "Fetched post successfully",
                 status: 200,
-                data: user
+                data: post
             };
         } catch (error) {
             console.error("Error fetching user:", error); 
@@ -79,6 +96,86 @@ export default class PostService{
             };
         }
     }
-    
-    
+    public static async updatePost(postid: string,newPost:updatePostDTO) :Promise<responseData<postWhithUserDTO>>{
+        try {
+            const {title,content} = newPost
+            const post = await postModel.findByIdAndUpdate
+            (
+                postid,
+                {$set:{title:title,content:content}},
+                { new: true, runValidators: true }          
+            )
+            .select('id title content author') 
+            .populate('author', 'id username email');
+
+            if (!post) {
+                return {
+                    err: true,
+                    message: "post not found",
+                    status: 404,
+                    data: null 
+                };
+            }
+            return {
+                err: false,
+                message: "post update successfully",
+                status: 200,
+                data: post
+            };
+        } catch (error) {
+            console.error("Error fetching post:", error); 
+            return {
+                err: true,
+                message: "Server error",
+                status: 500,
+                data: error 
+            };
+        }
+    }
+    public static async deleteByPostId(postid: string) :Promise<responseData<postWhithUserDTO>>{
+        try {            
+            const post = await postModel.findById(postid) 
+            .select('author') 
+            const user = await userModel.findById(post?.author)
+            if(!user)
+            {
+                return {
+                    err: true,
+                    message: "user not found",
+                    status: 404,
+                    data: null 
+                };
+            }
+          
+            await userModel.updateOne(
+                { _id: post?.author },
+                { $pull: { posts: postid } }
+                );
+
+            const result = await postModel.deleteOne({ _id: postid });
+
+            if (!result) {
+                return {
+                    err: true,
+                    message: "post not found",
+                    status: 404,
+                    data: null 
+                };
+            }
+            return {
+                err: false,
+                message: "Fetched post successfully",
+                status: 200,
+                data: postid
+            };
+        } catch (error) {
+            console.error("Error fetching user:", error); 
+            return {
+                err: true,
+                message: "Server error",
+                status: 500,
+                data: error 
+            };
+        }
+    }
 }
