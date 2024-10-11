@@ -35,6 +35,10 @@ const UserSchema = new mongoose_1.Schema({
         required: [true, 'Username is required'],
         minlength: [5, 'Name too short. Must be at least 10 characters long']
     },
+    password: {
+        type: String,
+        required: [true, 'password is required'],
+    },
     email: {
         type: String,
         required: true,

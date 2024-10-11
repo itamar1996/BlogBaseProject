@@ -3,6 +3,7 @@ import newPostDTO from "../DTO/newPostDTO";
 import PostService from "../services/postService";
 import updatePostDTO from "../DTO/updatePostDTO";
 import addCommentDTO from "../DTO/addCommentDTO";
+import jwt from 'jsonwebtoken';
 
 // Create a new post
 export const createPost = async (
@@ -11,7 +12,11 @@ export const createPost = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const result =  await PostService.createPost(req.body);
+    const token = req.cookies.auth_token;
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
+    const userId = (decodedToken as any).id;
+    const result =  await PostService.createPost(req.body,userId);
     res.status(200).json(result)
 } catch (error) {
     console.log(error);
@@ -25,7 +30,10 @@ export const deletePost = async (
   next: NextFunction
 ): Promise<void> => {
   try {    
-    const result =  await PostService.deleteByPostId(req.params.id);
+    const token = req.cookies.auth_token;
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
+    const userId = (decodedToken as any).id;
+    const result =  await PostService.deleteByPostId(req.params.id,userId);
 
     res.status(200).json(result)
 } catch (error) {
@@ -33,9 +41,6 @@ export const deletePost = async (
 }
 };
 
-
-
-// Get all posts
 export const getPosts = async (
   req: Request,
   res: Response,
@@ -49,8 +54,6 @@ export const getPosts = async (
 }
 };
 
-
-// Get a single post by ID
 export const getPost = async (
   req: Request,
   res: Response,
@@ -64,8 +67,6 @@ export const getPost = async (
 }
 };
 
-
-// Update a post
 export const updatePost = async (
   req: Request<any,any,updatePostDTO>,
   res: Response,

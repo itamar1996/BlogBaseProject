@@ -2,13 +2,15 @@ import registerDTO from "../DTO/registerDTO";
 import responseData from "../DTO/responceDataDTO";
 import userModel from "../models/userModel";
 import UserModel from '../models/userModel'
+import bcrypt from 'bcrypt'
 export default class UserService{
     public static async signup(user:registerDTO):Promise<responseData<{ id: string }>>{
         try {                        
-            const { username, email } = user;
+            const { username, email ,password} = user;
             const dbUser = new UserModel({
                 username,
-                email
+                email,
+                password:await bcrypt.hash(password, 10)
               });              
             await dbUser.save()  
             return {

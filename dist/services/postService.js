@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const postModel_1 = __importDefault(require("../models/postModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 class PostService {
-    static createPost(newPost) {
+    static createPost(newPost, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { title, content, author } = newPost;
@@ -25,7 +25,7 @@ class PostService {
                     author
                 });
                 yield dbPost.save();
-                const user = yield userModel_1.default.findById(author);
+                const user = yield userModel_1.default.findById(userId);
                 if (!user) {
                     return {
                         err: true,
@@ -143,12 +143,28 @@ class PostService {
             }
         });
     }
-    static deleteByPostId(postid) {
+    static deleteByPostId(postid, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const post = yield postModel_1.default.findById(postid)
                     .select('author');
-                const user = yield userModel_1.default.findById(post === null || post === void 0 ? void 0 : post.author);
+                if (!post) {
+                    return {
+                        err: true,
+                        message: "post not found",
+                        status: 404,
+                        data: null
+                    };
+                }
+                if (post.author.toString() != userId) {
+                    return {
+                        err: true,
+                        message: "user not mach to the post",
+                        status: 404,
+                        data: null
+                    };
+                }
+                const user = yield userModel_1.default.findById(post.author);
                 if (!user) {
                     return {
                         err: true,
@@ -159,14 +175,6 @@ class PostService {
                 }
                 yield userModel_1.default.updateOne({ _id: post === null || post === void 0 ? void 0 : post.author }, { $pull: { posts: postid } });
                 const result = yield postModel_1.default.deleteOne({ _id: postid });
-                if (!result) {
-                    return {
-                        err: true,
-                        message: "post not found",
-                        status: 404,
-                        data: null
-                    };
-                }
                 return {
                     err: false,
                     message: "Fetched post successfully",

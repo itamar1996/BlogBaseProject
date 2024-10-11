@@ -14,14 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const userModel_1 = __importDefault(require("../models/userModel"));
 const userModel_2 = __importDefault(require("../models/userModel"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 class UserService {
     static signup(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { username, email } = user;
+                const { username, email, password } = user;
                 const dbUser = new userModel_2.default({
                     username,
-                    email
+                    email,
+                    password: yield bcrypt_1.default.hash(password, 10)
                 });
                 yield dbUser.save();
                 return {

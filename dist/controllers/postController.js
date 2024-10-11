@@ -14,10 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addComment = exports.updatePost = exports.getPost = exports.getPosts = exports.deletePost = exports.createPost = void 0;
 const postService_1 = __importDefault(require("../services/postService"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 // Create a new post
 const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield postService_1.default.createPost(req.body);
+        const token = req.cookies.auth_token;
+        const decodedToken = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const userId = decodedToken.id;
+        const result = yield postService_1.default.createPost(req.body, userId);
         res.status(200).json(result);
     }
     catch (error) {
@@ -28,7 +32,10 @@ exports.createPost = createPost;
 // Delete a post
 const deletePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield postService_1.default.deleteByPostId(req.params.id);
+        const token = req.cookies.auth_token;
+        const decodedToken = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const userId = decodedToken.id;
+        const result = yield postService_1.default.deleteByPostId(req.params.id, userId);
         res.status(200).json(result);
     }
     catch (error) {
@@ -36,7 +43,6 @@ const deletePost = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.deletePost = deletePost;
-// Get all posts
 const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield postService_1.default.getAllPosts();
@@ -47,7 +53,6 @@ const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getPosts = getPosts;
-// Get a single post by ID
 const getPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield postService_1.default.getByPostId(req.params.id);
@@ -58,7 +63,6 @@ const getPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getPost = getPost;
-// Update a post
 const updatePost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield postService_1.default.updatePost(req.params.id, req.body);

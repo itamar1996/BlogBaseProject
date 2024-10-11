@@ -9,16 +9,17 @@ import userModel from "../models/userModel";
 import addCommentDTO from '../DTO/addCommentDTO';
 import postWhitCommentsDTO from '../DTO/postWhitCommentsDTO';
 export default class PostService{
-    public static async createPost(newPost:newPostDTO):Promise<responseData<{ id: string }>>{
+    public static async createPost(newPost:newPostDTO,userId:string):Promise<responseData<{ id: string }>>{
         try {                        
             const { title, content,author } = newPost;
             const dbPost = new postModel({
               title,
               content,
+
               author
               });     
             await dbPost.save() 
-            const user = await userModel.findById(author);
+            const user = await userModel.findById(userId);
         if (!user) {
             return {
                 err: true,
@@ -134,11 +135,31 @@ export default class PostService{
             };
         }
     }
-    public static async deleteByPostId(postid: string) :Promise<responseData<postWhithUserDTO>>{
+    public static async deleteByPostId(postid: string,userId:string) :Promise<responseData<postWhithUserDTO>>{
         try {            
             const post = await postModel.findById(postid) 
             .select('author') 
-            const user = await userModel.findById(post?.author)
+
+            if(!post)
+            {
+                return {
+                    err: true,
+                    message: "post not found",
+                    status: 404,
+                    data: null 
+                };  
+            }
+            if(post.author.toString() != userId)
+            {
+                return {
+                    err: true,
+                    message: "user not mach to the post",
+                    status: 404,
+                    data: null 
+                };   
+            }
+            const user = await userModel.findById(post.author)
+
             if(!user)
             {
                 return {
@@ -156,20 +177,14 @@ export default class PostService{
 
             const result = await postModel.deleteOne({ _id: postid });
 
-            if (!result) {
-                return {
-                    err: true,
-                    message: "post not found",
-                    status: 404,
-                    data: null 
-                };
-            }
+            
             return {
                 err: false,
                 message: "Fetched post successfully",
                 status: 200,
                 data: postid
-            };
+            }
+            
         } catch (error) {
             console.error("Error fetching user:", error); 
             return {

@@ -7,6 +7,7 @@ import {
   deletePost,
   addComment,
 } from "../controllers/postController";
+import verifyUser from "../middleware/verifyUser";
 
 const postRouter = Router();
 

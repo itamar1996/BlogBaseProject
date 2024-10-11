@@ -3,6 +3,7 @@ import validator from "validator";
 
 export interface IUser extends Document {
   username: string;
+  password:string;
   email: string;
   profile: {
     bio?: string;
@@ -17,6 +18,10 @@ const UserSchema = new Schema<IUser>({
     unique: true,
     required: [true, 'Username is required'],
     minlength: [5, 'Name too short. Must be at least 10 characters long']
+  },
+  password:{
+    type: String,
+    required: [true, 'password is required'],
   },
   email: {
     type: String,
